@@ -12,15 +12,31 @@ body {
     background: #f2f2f2;
 }
 
-.header {
+#loginScreen {
+    padding: 20px;
+    text-align: center;
+    margin-top: 40px;
+}
+
+#nameInput {
+    width: 80%;
+    padding: 14px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 18px;
+}
+
+#continueBtn {
     background: #4CAF50;
     color: white;
-    padding: 16px;
-    font-size: 24px;
-    font-weight: bold;
+    border: none;
+    padding: 14px 24px;
+    border-radius: 10px;
+    font-size: 18px;
 }
 
 #rooms {
+    display: none;
     padding: 15px;
 }
 
@@ -40,33 +56,43 @@ body {
 
 #chatScreen {
     display: none;
-    height: calc(100vh - 60px);
 }
 
 #messages {
     padding: 10px;
-    overflow-y: auto;
-    height: calc(100vh - 170px);
+    padding-bottom: 100px;
 }
 
 .message {
     background: white;
-    padding: 10px;
-    margin-bottom: 10px;
-    border-radius: 10px;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    padding: 14px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.12);
 }
 
 .name {
     font-weight: bold;
     color: #4CAF50;
+    font-size: 22px;
+    margin-bottom: 6px;
+}
+
+.deleteBtn {
+    margin-top: 10px;
+    background: #ff4444;
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 8px;
+    font-size: 14px;
 }
 
 #bottomBar {
     position: fixed;
     bottom: 0;
     width: 100%;
-    background: white;
+    background: #f2f2f2;
     padding: 10px;
     display: flex;
     gap: 10px;
@@ -75,159 +101,262 @@ body {
 
 #messageInput {
     flex: 1;
-    padding: 12px;
-    border-radius: 10px;
+    padding: 14px;
+    border-radius: 12px;
     border: 1px solid #ccc;
-    font-size: 16px;
+    font-size: 18px;
 }
 
 #sendBtn {
     background: #4CAF50;
     color: white;
     border: none;
-    padding: 12px 20px;
-    border-radius: 10px;
-    font-size: 16px;
-}
-
-#backBtn {
-    background: white;
-    color: #4CAF50;
-    border: none;
+    padding: 14px 22px;
+    border-radius: 12px;
     font-size: 18px;
-    margin-right: 10px;
 }
 </style>
 </head>
 <body>
 
-<!-- ActionBar do Android já aparece no app -->
+<!-- Tela nome -->
 
-<div id="loginScreen" style="padding:20px; text-align:center; margin-top:40px;">
+<div id="loginScreen">
+
     <h1>Hangout</h1>
 
     <input
         type="text"
         id="nameInput"
-        placeholder="Seu nome"
-        style="width:80%; padding:14px; border-radius:10px; border:1px solid #ccc; font-size:18px;">
+        placeholder="Seu nome">
 
     <br><br>
 
     <button
-        onclick="continueApp()"
-        style="background:#4CAF50; color:white; border:none; padding:14px 24px; border-radius:10px; font-size:18px;">
+        id="continueBtn"
+        onclick="continueApp()">
         Continuar
     </button>
+
 </div>
 
-<div id="rooms" style="display:none;">
-    <div class="room" onclick="enterRoom('Room1')">Room 1</div>
-    <div class="room" onclick="enterRoom('Room2')">Room 2</div>
-    <div class="room" onclick="enterRoom('Room3')">Room 3</div>
+<!-- Rooms -->
+
+<div id="rooms">
+
+    <div class="room" onclick="enterRoom('Room1')">
+        Room 1
+    </div>
+
+    <div class="room" onclick="enterRoom('Room2')">
+        Room 2
+    </div>
+
+    <div class="room" onclick="enterRoom('Room3')">
+        Room 3
+    </div>
+
 </div>
+
+<!-- Chat -->
 
 <div id="chatScreen">
+
     <div id="messages"></div>
 
     <div id="bottomBar">
-        <input type="text" id="messageInput" placeholder="Mensagem...">
-        <button id="sendBtn">Enviar</button>
+
+        <input
+            type="text"
+            id="messageInput"
+            placeholder="Mensagem...">
+
+        <button id="sendBtn">
+            Enviar
+        </button>
+
     </div>
+
 </div>
 
 <script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
 import {
     getDatabase,
     ref,
     push,
-    onChildAdded
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+    onChildAdded,
+    remove
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
 const firebaseConfig = {
+
   apiKey: "AIzaSyCawUJWCCQNq3tCkNLDTZeI2BYhusxvRUM",
+
   authDomain: "hangout-966e7.firebaseapp.com",
-  databaseURL: "https://hangout-966e7-default-rtdb.firebaseio.com",
+
+  databaseURL:
+  "https://hangout-966e7-default-rtdb.firebaseio.com",
+
   projectId: "hangout-966e7",
-  storageBucket: "hangout-966e7.firebasestorage.app",
+
+  storageBucket:
+  "hangout-966e7.firebasestorage.app",
+
   messagingSenderId: "845219164699",
-  appId: "1:845219164699:web:13885326b0414c42747ebe",
+
+  appId:
+  "1:845219164699:web:13885326b0414c42747ebe",
+
   measurementId: "G-3NY006BE55"
 };
 
 const app = initializeApp(firebaseConfig);
-const db = getDatabase(app);
 
-let currentRoom = "";
+const db = getDatabase(app);
 
 let username = "";
 
+let currentRoom = "";
+
 window.continueApp = function() {
 
-    const input = document.getElementById("nameInput");
+    const input =
+    document.getElementById("nameInput");
 
     username = input.value.trim();
 
     if(username === "") {
+
         alert("Digite um nome");
+
         return;
     }
 
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("rooms").style.display = "block";
+    document.getElementById(
+        "loginScreen"
+    ).style.display = "none";
+
+    document.getElementById(
+        "rooms"
+    ).style.display = "block";
 };
 
 window.enterRoom = function(roomName) {
 
     currentRoom = roomName;
 
-    document.getElementById("rooms").style.display = "none";
-    document.getElementById("chatScreen").style.display = "block";
+    document.getElementById(
+        "rooms"
+    ).style.display = "none";
 
-    document.title = roomName;
+    document.getElementById(
+        "chatScreen"
+    ).style.display = "block";
 
-    const messagesDiv = document.getElementById("messages");
+    const messagesDiv =
+    document.getElementById("messages");
+
     messagesDiv.innerHTML = "";
 
-    const roomRef = ref(db, "rooms/" + roomName);
+    const roomRef =
+    ref(db, "rooms/" + roomName);
 
     onChildAdded(roomRef, function(snapshot) {
 
         const data = snapshot.val();
 
-        const msg = document.createElement("div");
+        const msg =
+        document.createElement("div");
+
         msg.className = "message";
 
+        const msgId = snapshot.key;
+
         msg.innerHTML =
-            "<div class='name'>" + data.name + "</div>" +
-            "<div>" + data.message + "</div>";
+
+            "<div class='name'>" +
+            data.name +
+            "</div>" +
+
+            "<div>" +
+            data.message +
+            "</div>";
+
+        // Pode excluir se tiver mesmo nome
+        if(data.name === username) {
+
+            const deleteBtn =
+            document.createElement("button");
+
+            deleteBtn.innerHTML = "Excluir";
+
+            deleteBtn.className = "deleteBtn";
+
+            deleteBtn.onclick = function() {
+
+                remove(
+                    ref(
+                        db,
+                        "rooms/" +
+                        currentRoom +
+                        "/" +
+                        msgId
+                    )
+                );
+
+                msg.remove();
+            };
+
+            msg.appendChild(deleteBtn);
+        }
 
         messagesDiv.appendChild(msg);
 
-        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        messagesDiv.scrollTop =
+        messagesDiv.scrollHeight;
     });
 };
 
-const sendBtn = document.getElementById("sendBtn");
+const sendBtn =
+document.getElementById("sendBtn");
 
-sendBtn.addEventListener("click", function() {
+sendBtn.addEventListener(
+    "click",
+    function() {
 
-    const input = document.getElementById("messageInput");
+        const input =
+        document.getElementById(
+            "messageInput"
+        );
 
-    const text = input.value.trim();
+        const text =
+        input.value.trim();
 
-    if(text === "") return;
+        if(text === "") return;
 
-    const roomRef = ref(db, "rooms/" + currentRoom);
+        const roomRef =
+        ref(
+            db,
+            "rooms/" + currentRoom
+        );
 
-    push(roomRef, {
-        name: username,
-        message: text
-    });
+        push(roomRef, {
 
-    input.value = "";
-});
+            name: username,
+
+            message: text
+
+        });
+
+        input.value = "";
+    }
+);
+
 </script>
 
 </body>
