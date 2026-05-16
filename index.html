@@ -6,69 +6,196 @@
 <title>Hangout</title>
 
 <style>
-    body {
-        margin: 0;
-        padding: 0;
-        background: #f2f2f2;
-        font-family: Arial, sans-serif;
-        height: 100vh;
-        overflow: hidden;
-    }
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background: #f2f2f2;
+}
 
-    .content {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        height: 100%;
-        text-align: center;
-        padding: 20px;
-        box-sizing: border-box;
-    }
+.header {
+    background: #4CAF50;
+    color: white;
+    padding: 16px;
+    font-size: 24px;
+    font-weight: bold;
+}
 
-    h1 {
-        color: #222;
-        font-size: 42px;
-        margin: 0;
-    }
+#rooms {
+    padding: 15px;
+}
 
-    /* Botão circular */
-    .fab {
-        position: fixed;
-        right: 24px;
-        bottom: 24px;
+.room {
+    background: white;
+    padding: 18px;
+    margin-bottom: 12px;
+    border-radius: 12px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+    cursor: pointer;
+    font-size: 20px;
+}
 
-        width: 60px;
-        height: 60px;
+.room:hover {
+    background: #eeeeee;
+}
 
-        border-radius: 50%;
-        border: none;
+#chatScreen {
+    display: none;
+    height: calc(100vh - 60px);
+}
 
-        background: #4CAF50;
-        color: white;
+#messages {
+    padding: 10px;
+    overflow-y: auto;
+    height: calc(100vh - 170px);
+}
 
-        font-size: 36px;
-        line-height: 60px;
+.message {
+    background: white;
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 10px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
 
-        text-align: center;
+.name {
+    font-weight: bold;
+    color: #4CAF50;
+}
 
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+#bottomBar {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
+    background: white;
+    padding: 10px;
+    display: flex;
+    gap: 10px;
+    box-sizing: border-box;
+}
 
-        cursor: pointer;
-    }
+#messageInput {
+    flex: 1;
+    padding: 12px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 16px;
+}
 
-    .fab:active {
-        transform: scale(0.95);
-    }
+#sendBtn {
+    background: #4CAF50;
+    color: white;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 16px;
+}
+
+#backBtn {
+    background: white;
+    color: #4CAF50;
+    border: none;
+    font-size: 18px;
+    margin-right: 10px;
+}
 </style>
 </head>
-
 <body>
 
-<div class="content">
-    
+<div class="header" id="headerText">Hangout</div>
+
+<div id="rooms">
+    <div class="room" onclick="enterRoom('Room1')">Room 1</div>
+    <div class="room" onclick="enterRoom('Room2')">Room 2</div>
+    <div class="room" onclick="enterRoom('Room3')">Room 3</div>
 </div>
 
-<button class="fab">+</button>
+<div id="chatScreen">
+    <div id="messages"></div>
+
+    <div id="bottomBar">
+        <input type="text" id="messageInput" placeholder="Mensagem...">
+        <button id="sendBtn">Enviar</button>
+    </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+    getDatabase,
+    ref,
+    push,
+    onChildAdded
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
+
+const firebaseConfig = {
+  apiKey: "AIzaSyCawUJWCCQNq3tCkNLDTZeI2BYhusxvRUM",
+  authDomain: "hangout-966e7.firebaseapp.com",
+  databaseURL: "https://hangout-966e7-default-rtdb.firebaseio.com",
+  projectId: "hangout-966e7",
+  storageBucket: "hangout-966e7.firebasestorage.app",
+  messagingSenderId: "845219164699",
+  appId: "1:845219164699:web:13885326b0414c42747ebe",
+  measurementId: "G-3NY006BE55"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+let currentRoom = "";
+
+const username = prompt("Seu nome:") || "Anônimo";
+
+window.enterRoom = function(roomName) {
+
+    currentRoom = roomName;
+
+    document.getElementById("rooms").style.display = "none";
+    document.getElementById("chatScreen").style.display = "block";
+
+    document.getElementById("headerText").innerHTML = roomName;
+
+    const messagesDiv = document.getElementById("messages");
+    messagesDiv.innerHTML = "";
+
+    const roomRef = ref(db, "rooms/" + roomName);
+
+    onChildAdded(roomRef, function(snapshot) {
+
+        const data = snapshot.val();
+
+        const msg = document.createElement("div");
+        msg.className = "message";
+
+        msg.innerHTML =
+            "<div class='name'>" + data.name + "</div>" +
+            "<div>" + data.message + "</div>";
+
+        messagesDiv.appendChild(msg);
+
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+    });
+};
+
+const sendBtn = document.getElementById("sendBtn");
+
+sendBtn.addEventListener("click", function() {
+
+    const input = document.getElementById("messageInput");
+
+    const text = input.value.trim();
+
+    if(text === "") return;
+
+    const roomRef = ref(db, "rooms/" + currentRoom);
+
+    push(roomRef, {
+        name: username,
+        message: text
+    });
+
+    input.value = "";
+});
+</script>
 
 </body>
 </html>
