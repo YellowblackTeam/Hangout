@@ -55,6 +55,12 @@ body {
     background: #eeeeee;
 }
 
+.roomCount {
+    margin-top: 8px;
+    color: gray;
+    font-size: 16px;
+}
+
 #chatScreen {
     display: none;
 }
@@ -148,15 +154,45 @@ body {
 <div id="rooms">
 
     <div class="room" onclick="enterRoom('Room1')">
+
         Room 1
+
+        <div
+            class="roomCount"
+            id="count-Room1">
+
+            0 usuários online
+
+        </div>
+
     </div>
 
     <div class="room" onclick="enterRoom('Room2')">
+
         Room 2
+
+        <div
+            class="roomCount"
+            id="count-Room2">
+
+            0 usuários online
+
+        </div>
+
     </div>
 
     <div class="room" onclick="enterRoom('Room3')">
+
         Room 3
+
+        <div
+            class="roomCount"
+            id="count-Room3">
+
+            0 usuários online
+
+        </div>
+
     </div>
 
 </div>
@@ -192,7 +228,10 @@ import {
     ref,
     push,
     onChildAdded,
-    remove
+    onValue,
+    remove,
+    set,
+    onDisconnect
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-database.js";
 
@@ -226,6 +265,10 @@ let username = "";
 
 let currentRoom = "";
 
+// ID único do usuário
+const userId =
+Math.random().toString(36).substring(2);
+
 window.continueApp = function() {
 
     const input =
@@ -252,6 +295,23 @@ window.continueApp = function() {
 window.enterRoom = function(roomName) {
 
     currentRoom = roomName;
+
+    // Marca online
+    const onlineRef =
+    ref(
+        db,
+        "online/" +
+        roomName +
+        "/" +
+        userId
+    );
+
+    set(onlineRef, {
+        name: username
+    });
+
+    // Remove ao sair
+    onDisconnect(onlineRef).remove();
 
     document.getElementById(
         "rooms"
@@ -377,6 +437,34 @@ sendBtn.addEventListener(
         input.value = "";
     }
 );
+
+// Atualiza usuários online
+
+function updateOnline(roomName) {
+
+    const onlineRef =
+    ref(db, "online/" + roomName);
+
+    onValue(onlineRef, function(snapshot) {
+
+        let count = 0;
+
+        snapshot.forEach(function() {
+
+            count++;
+
+        });
+
+        document.getElementById(
+            "count-" + roomName
+        ).innerHTML =
+            count + " usuários online";
+    });
+}
+
+updateOnline("Room1");
+updateOnline("Room2");
+updateOnline("Room3");
 
 </script>
 
