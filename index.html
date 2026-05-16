@@ -101,9 +101,27 @@ body {
 </head>
 <body>
 
-<div class="header" id="headerText">Hangout</div>
+<!-- ActionBar do Android já aparece no app -->
 
-<div id="rooms">
+<div id="loginScreen" style="padding:20px; text-align:center; margin-top:40px;">
+    <h1>Hangout</h1>
+
+    <input
+        type="text"
+        id="nameInput"
+        placeholder="Seu nome"
+        style="width:80%; padding:14px; border-radius:10px; border:1px solid #ccc; font-size:18px;">
+
+    <br><br>
+
+    <button
+        onclick="continueApp()"
+        style="background:#4CAF50; color:white; border:none; padding:14px 24px; border-radius:10px; font-size:18px;">
+        Continuar
+    </button>
+</div>
+
+<div id="rooms" style="display:none;">
     <div class="room" onclick="enterRoom('Room1')">Room 1</div>
     <div class="room" onclick="enterRoom('Room2')">Room 2</div>
     <div class="room" onclick="enterRoom('Room3')">Room 3</div>
@@ -143,7 +161,22 @@ const db = getDatabase(app);
 
 let currentRoom = "";
 
-const username = prompt("Seu nome:") || "Anônimo";
+let username = "";
+
+window.continueApp = function() {
+
+    const input = document.getElementById("nameInput");
+
+    username = input.value.trim();
+
+    if(username === "") {
+        alert("Digite um nome");
+        return;
+    }
+
+    document.getElementById("loginScreen").style.display = "none";
+    document.getElementById("rooms").style.display = "block";
+};
 
 window.enterRoom = function(roomName) {
 
@@ -152,7 +185,7 @@ window.enterRoom = function(roomName) {
     document.getElementById("rooms").style.display = "none";
     document.getElementById("chatScreen").style.display = "block";
 
-    document.getElementById("headerText").innerHTML = roomName;
+    document.title = roomName;
 
     const messagesDiv = document.getElementById("messages");
     messagesDiv.innerHTML = "";
